@@ -96,7 +96,7 @@ results/processed/
 
 ## Autor
 
-Carlos Ángel Gálvez  
-Trabajo Final de Grado 
-Grado en Ing. de Tecnologías y Servicios de Telecomunicación
-Universitat Oberta de Catalunya
+- **Autor:** Carlos Ángel Gálvez
+- **Trabajo:** Trabajo Final de Grado
+- **Titulación:** Grado en Ingeniería de Tecnologías y Servicios de Telecomunicación
+- **Universidad:** Universitat Oberta de Catalunya
