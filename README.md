@@ -97,5 +97,6 @@ results/processed/
 ## Autor
 
 Carlos Ángel Gálvez  
-Trabajo Final de Grado  
+Trabajo Final de Grado 
+Grado en Ing. de Tecnologías y Servicios de Telecomunicación
 Universitat Oberta de Catalunya
