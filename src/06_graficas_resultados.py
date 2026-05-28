@@ -422,3 +422,50 @@ plt.tight_layout()
 plt.savefig(FIGURES_DIR / 'fig_tiempos.png', dpi=300, bbox_inches='tight')
 plt.show()
 print("Gráfica guardada: results/figures/fig_tiempos.png")
+
+# === GRÁFICA 9: SCATTER KNN BASE vs KNN CON RUIDO σ=6 ===
+# Esta gráfica muestra para CADA muestra individual el error espacial
+# en el escenario base vs el error obtenido con ruido σ=6 dBm.
+# La dispersión alrededor de la diagonal valida que el ruido gaussiano
+# de media cero produce efectos heterogéneos: 512 muestras mejoran,
+# 588 empeoran, lo que se agrega en una mejora ligera del MAE promedio.
+
+# Cargar vectores de distancias precalculadas
+distancia_base = np.load(PROCESSED_DIR / 'distancias_base_knn.npy')
+distancia_ruido = np.load(PROCESSED_DIR / 'distancias_ruido6_knn.npy')
+
+fig, ax = plt.subplots(figsize=(10, 8))
+
+ax.scatter(distancia_base, distancia_ruido, s=20, alpha=0.6, color='#2196F3', 
+           edgecolors='black', linewidth=0.5)
+
+# Línea diagonal de referencia (donde base = ruido)
+max_error = max(distancia_base.max(), distancia_ruido.max())
+ax.plot([0, max_error], [0, max_error], 'k--', linewidth=2, alpha=0.3, label='Sin cambio')
+
+# Líneas de media
+ax.axhline(y=distancia_ruido.mean(), color='green', linestyle='--', linewidth=1.5, 
+           alpha=0.6, label=f'MAE ruido σ=6: {distancia_ruido.mean():.2f} m')
+ax.axvline(x=distancia_base.mean(), color='red', linestyle='--', linewidth=1.5, 
+           alpha=0.6, label=f'MAE base: {distancia_base.mean():.2f} m')
+
+ax.set_xlabel('Error espacial en escenario base (m)', fontsize=12, fontweight='bold')
+ax.set_ylabel('Error espacial con ruido σ=6 dBm (m)', fontsize=12, fontweight='bold')
+ax.set_title('KNN: Errores individuales - Base vs Ruido σ=6', fontsize=14, fontweight='bold')
+ax.grid(True, alpha=0.3)
+ax.legend(fontsize=10, loc='upper left')
+
+# Estadísticas
+n_mejor = np.sum(distancia_ruido < distancia_base)
+n_peor = np.sum(distancia_ruido > distancia_base)
+
+textstr = f'Mejoran: {n_mejor}\nEmpeoran: {n_peor}\nCambio MAE: {distancia_ruido.mean() - distancia_base.mean():.2f} m'
+ax.text(0.98, 0.05, textstr, transform=ax.transAxes, fontsize=10,
+        verticalalignment='bottom', horizontalalignment='right',
+        bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+plt.tight_layout()
+plt.savefig(FIGURES_DIR / 'fig_scatter_knn_ruido.png', dpi=300, bbox_inches='tight')
+plt.show()
+print("Gráfica guardada: results/figures/fig_scatter_knn_ruido.png")
+

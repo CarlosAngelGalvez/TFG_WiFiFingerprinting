@@ -120,8 +120,23 @@ for sigma in sigmas:
     # primero sustituyo el centinela 100 por -110 dBm,
     # después normalizo con el scaler ajustado en entrenamiento.
     X_val_ruidoso[X_val_ruidoso == 100] = -110
+
+    # Mantener valores en rango válido 
+    # El ruido puede producir valores fuera del rango original.
+    # Los limitamos al rango observado en entrenamiento para que
+    # el escalador funcione consistentemente.
+    X_val_ruidoso = np.clip(X_val_ruidoso, -110, 0)
+
     X_val_norm = scaler_x.transform(X_val_ruidoso)
 
+ # === DIAGNÓSTICO: DISTRIBUCIÓN DE DATOS ===
+    #print(f"  Shape X_val_norm: {X_val_norm.shape}")
+    #print(f"  Min X_val_norm: {X_val_norm.min():.6f}")
+    #print(f"  Max X_val_norm: {X_val_norm.max():.6f}")
+    #print(f"  Mean X_val_norm: {X_val_norm.mean():.6f}")
+    #print(f"  Std X_val_norm: {X_val_norm.std():.6f}")
+    #print(f"  NaN count: {np.isnan(X_val_norm).sum()}")
+    #print(f"  Inf count: {np.isinf(X_val_norm).sum()}")
     #np.savetxt("sigma"+str(sigma)+".csv",X_val_ruidoso , delimiter=",", fmt="%d")
     #np.savetxt("normal.csv",X_val_original , delimiter=",", fmt="%d")
     #np.savetxt("ruido"+str(sigma)+".csv",ruido, delimiter=",", fmt="%d")  
@@ -147,4 +162,55 @@ for sigma in sigmas:
 
 # Guardo los resultados para las gráficas del script 06.
 np.save('results/processed/resultados_ruido.npy', resultados_ruido, allow_pickle=True)
+# Guardo los vectores de distancias individuales de KNN para el scatter plot del script 06
+res_base = np.load('results/processed/resultados_base.npy', allow_pickle=True).item()
+np.save('results/processed/distancias_base_knn.npy', res_base['KNN']['distancias'])
+np.save('results/processed/distancias_ruido6_knn.npy', resultados_ruido[6]['KNN']['distancias'])
 print("\nResultados guardados en results/processed/resultados_ruido.npy")
+
+# === DIAGNÓSTICO: VALIDAR COHERENCIA KNN RUIDO σ=6 ===
+# Verifico que los valores calculados para KNN coincidan con la tabla
+# y que la dispersión de errores individuales tenga sentido.
+# Esto es importante para justificar la mejora ligera de KNN bajo ruido.
+
+print("\n" + "=" * 60)
+print("DIAGNÓSTICO: KNN RUIDO σ=6 vs BASE")
+print("=" * 60)
+
+# Obtengo los vectores de distancias individuales del escenario base
+# (que ya está calculado en resultados del script 03)
+res_base = np.load('results/processed/resultados_base.npy', allow_pickle=True).item()
+distancias_base_knn = res_base['KNN']['distancias']
+distancias_ruido_knn = resultados_ruido[6]['KNN']['distancias']
+
+print(f"\n--- LONGITUD DE VECTORES ---")
+print(f"Muestras base: {len(distancias_base_knn)}")
+print(f"Muestras ruido σ=6: {len(distancias_ruido_knn)}")
+
+print(f"\n--- MEDIAS (MAE) ---")
+print(f"MAE base KNN (tabla): 10,25 m")
+print(f"MAE base KNN (calculado): {distancias_base_knn.mean():.2f} m")
+print(f"MAE ruido σ=6 KNN (tabla): 10,07 m")
+print(f"MAE ruido σ=6 KNN (calculado): {distancias_ruido_knn.mean():.2f} m")
+
+print(f"\n--- ESTADÍSTICAS DESCRIPTIVAS ---")
+print(f"{'':.<30} {'Base':>15} {'Ruido σ=6':>15}")
+print(f"{'Mínimo':<30} {distancias_base_knn.min():>15.2f} {distancias_ruido_knn.min():>15.2f}")
+print(f"{'Máximo':<30} {distancias_base_knn.max():>15.2f} {distancias_ruido_knn.max():>15.2f}")
+print(f"{'Mediana':<30} {np.median(distancias_base_knn):>15.2f} {np.median(distancias_ruido_knn):>15.2f}")
+print(f"{'Desv. Estándar':<30} {np.std(distancias_base_knn):>15.2f} {np.std(distancias_ruido_knn):>15.2f}")
+
+print(f"\n--- ANÁLISIS DE CAMBIO POR MUESTRA ---")
+n_mejoran = np.sum(distancias_ruido_knn < distancias_base_knn)
+n_empeoran = np.sum(distancias_ruido_knn > distancias_base_knn)
+n_igual = np.sum(distancias_ruido_knn == distancias_base_knn)
+print(f"Muestras que mejoran: {n_mejoran} ({n_mejoran/len(distancias_base_knn)*100:.1f}%)")
+print(f"Muestras que empeoran: {n_empeoran} ({n_empeoran/len(distancias_base_knn)*100:.1f}%)")
+print(f"Muestras sin cambio: {n_igual}")
+
+print(f"\n--- CAMBIO PROMEDIO ---")
+cambio_promedio = distancias_ruido_knn.mean() - distancias_base_knn.mean()
+cambio_pct = (cambio_promedio / distancias_base_knn.mean()) * 100
+print(f"Cambio MAE: {cambio_promedio:+.2f} m ({cambio_pct:+.1f}%)")
+
+print("\n" + "=" * 60)

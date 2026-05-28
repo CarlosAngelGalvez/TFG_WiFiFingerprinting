@@ -54,6 +54,7 @@ print(f"Rango tras sustitución (val):   {X_val_raw.min()} a {X_val_raw.max()} d
 # El scaler se ajusta SOLO con los datos de entrenamiento (fit_transform)
 # y se aplica a validación con transform, para no filtrar información
 # del conjunto de validación al entrenamiento.
+
 scaler = MinMaxScaler()
 X_train = scaler.fit_transform(X_train_raw)
 X_val = scaler.transform(X_val_raw)

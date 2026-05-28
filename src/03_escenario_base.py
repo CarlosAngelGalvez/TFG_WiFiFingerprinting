@@ -68,8 +68,8 @@ modelos = {
 }
 
 # Entreno y evalúo cada modelo. Mido por separado los tiempos
-    # de entrenamiento y validación para analizar el coste
-    # computacional de cada fase de forma independiente.
+# de entrenamiento y validación para analizar el coste
+# computacional de cada fase de forma independiente.
 print("=" * 60)
 print("ESCENARIO BASE - Resultados")
 print("=" * 60)
@@ -82,16 +82,17 @@ for nombre, modelo in modelos.items():
     inicio = time.time()
 
 # El MLP se entrena con las coordenadas escaladas (StandardScaler)
-    # porque las magnitudes UTM originales impiden que Adam converja.
-    # Después de predecir, deshago el escalado con inverse_transform
-    # para obtener las coordenadas en metros y calcular las métricas.
-    # KNN y Random Forest trabajan directamente con las coordenadas originales.
-    #
-    # Se miden por separado los tiempos de entrenamiento y validación
-    # para analizar el coste computacional de cada fase. Esta distinción
-    # es relevante porque KNN no tiene entrenamiento real (solo almacena
-    # los datos), mientras que su validación es más costosa al requerir
-    # el cálculo de distancias contra todas las muestras de entrenamiento.
+# porque las magnitudes UTM originales impiden que Adam converja.
+# Después de predecir, deshago el escalado con inverse_transform
+# para obtener las coordenadas en metros y calcular las métricas.
+# KNN y Random Forest trabajan directamente con las coordenadas originales.
+#
+# Se miden por separado los tiempos de entrenamiento y validación
+# para analizar el coste computacional de cada fase. Esta distinción
+# es relevante porque KNN no tiene entrenamiento real (solo almacena
+# los datos), mientras que su validación es más costosa al requerir
+# el cálculo de distancias contra todas las muestras de entrenamiento.
+
     if nombre == 'MLP':
         # Entrenamiento: ajuste de pesos de la red
         inicio_train = time.time()
